@@ -25,30 +25,30 @@ const verificar = (id) => {
     input.classList.remove('is-invalid');
     input.classList.remove('is-valid');
 
-    if (input.value.trim() == '' && id !== 'fecha_ingreso') {
+    if (input.value.trim() == '' && id !== 'fecha_vencimiento') { // Cambia 'fecha_ingreso' por 'fecha_vencimiento'
         input.classList.add('is-invalid');
         div.innerHTML = '<span class="badge bg-danger">El campo es obligatorio</span>';
     } else {
-        input.classList.add('is-valid');
-        div.innerHTML = '';
-            if (id !== 'fecha_ingreso') {
-                if (id === 'codigo') {
-                } else if (id === 'cantidad' || id === 'precio') {
-                }
+        if (id !== 'fecha_vencimiento') { // Cambia 'fecha_ingreso' por 'fecha_vencimiento'
+            input.classList.add('is-valid');
+            div.innerHTML = '';
+        } else {
+            if (input.value.trim() === '') {
+                input.classList.add('is-invalid');
+                div.innerHTML = '<span class="badge bg-danger">La fecha de vencimiento es obligatoria</span>';
             } else {
-                if (input.value.trim() === '') {
+                const fechaVencimiento = new Date(input.value);
+                const ahora = new Date();
+                ahora.setHours(0, 0, 0, 0); // Establece la hora actual a las 00:00:00 para que solo se compare la fecha
+                
+                if (fechaVencimiento < ahora) {
                     input.classList.add('is-invalid');
-                    div.innerHTML = '<span class="badge bg-danger">La fecha de ingreso es obligatoria</span>';
+                    div.innerHTML = '<span class="badge bg-danger">La fecha de vencimiento no puede ser una fecha pasada</span>';
                 } else {
-                    const fechaIngreso = new Date(input.value);
-                    const ahora = new Date();
-                    
-                    if (fechaIngreso > ahora) {
-                        input.classList.add('is-invalid');
-                        div.innerHTML = '<span class="badge bg-danger">La fecha de ingreso no puede ser posterior a la fecha de hoy</span>';
-                    }
+                    input.classList.add('is-valid');
+                    div.innerHTML = '';
                 }
             }
         }
     }
-
+}

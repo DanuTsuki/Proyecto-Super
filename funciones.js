@@ -1,4 +1,5 @@
-import { getData, getDocumento, remove, save, update } from './firebase.js';
+import { getData, getDocumento, remove, save, update, getStorageRef } from './firebase.js';
+
 let id = 0;
 
 document.getElementById('btnSave').addEventListener('click', async (event) => {
@@ -22,11 +23,20 @@ document.getElementById('btnSave').addEventListener('click', async (event) => {
             Swal.fire('Guardado', '', 'success');
         } else {
             await update(id, producto);
+            Swal.fire('Editado', '', 'success');
         }
         id = 0;
         limpiar();
     }
 });
+
+async function uploadImage(file) {
+    const storageRef = getStorageRef(); 
+    const imageName = file.name;
+    const imageRef = ref(storageRef, imageName);
+    await uploadBytes(imageRef, file);
+    return getDownloadURL(imageRef); 
+}
 
 window.addEventListener('DOMContentLoaded', () => {
     getData((datos) => {
@@ -34,6 +44,7 @@ window.addEventListener('DOMContentLoaded', () => {
         datos.forEach((doc) => {
             const producto = doc.data();
             tabla += `<tr>
+                <td><img src="${producto.imagenUrl}" alt="${producto.nombre}" style="width:50px;height:50px;"/></td>
                 <td>${producto.codigo}</td>
                 <td>${producto.nombre}</td>
                 <td>${producto.descripcion}</td>
@@ -41,7 +52,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 <td>${producto.precio}</td>
                 <td>${producto.stock}</td>
                 <td>${producto.fecha_vencimiento}</td>
-                <td><img src="${producto.imagenUrl}" alt="${producto.nombre}" style="width:50px;height:50px;"/></td>
                 <td nowrap>
                     <button class="btn btn-warning" id="${doc.id}">Editar</button>
                     <button class="btn btn-danger" id="${doc.id}">Eliminar</button>
@@ -62,8 +72,12 @@ window.addEventListener('DOMContentLoaded', () => {
                     confirmButtonText: "Eliminar"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        remove(btn.id);
-                        Swal.fire("Eliminado!", "Su registro ha sido eliminado", "success");
+                        remove(btn.id).then(() => { 
+                            Swal.fire("Eliminado!", "Su registro ha sido eliminado", "success"); 
+                        }).catch(error => {
+                            console.error("Error al eliminar el registro:", error);
+                            Swal.fire("Error", "No se pudo eliminar el registro", "error");
+                        });
                     }
                 });
             });
@@ -89,3 +103,23 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+const limpiar = () => {
+    document.querySelector('form').reset()
+    document.querySelectorAll('.form-control').forEach(item => {
+        item.classList.remove('is-invalid')
+        item.classList.remove('is-valid')
+        const errorDiv = document.getElementById('e-' + item.id);
+        if (errorDiv) {
+            errorDiv.innerHTML = '';
+        }
+    });
+    const codigoInput = document.getElementById('codigo');
+    if (codigoInput) {
+        codigoInput.readOnly = false;
+    }
+    const btnSave = document.getElementById('btnSave');
+    if (btnSave) {
+        btnSave.value = 'Guardar';
+    }
+}
