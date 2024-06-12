@@ -54,3 +54,9 @@ export const update = async (id, producto) => {
 export const getStorageRef = () => {
     return ref(storage);
 }
+
+export const verificarCodigoUnico = async (codigo) => {
+    const q = query(collection(db, 'Productos'), where('codigo', '==', codigo));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+}

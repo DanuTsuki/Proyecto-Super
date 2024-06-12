@@ -21,7 +21,7 @@
                 <div class="card-body">
                     <div>
                         <label for="codigo"><i class="bi bi-barcode"></i> Código del Producto</label>
-                        <input type="text" id="codigo" name="codigo" class="form-control" onblur="verificar(this.id)">
+                        <input type="text" id="codigo" name="codigo" class="form-control" onblur="verificarCodigoRepetido(this)">
                         <div id="e-codigo"></div>
                     </div>
                     <div>
@@ -41,6 +41,11 @@
                             <option value="Alimentos">Alimentos</option>
                             <option value="Bebidas">Bebidas</option>
                             <option value="Limpieza">Limpieza</option>
+                            <option value="Higiene">Higiene</option>
+                            <option value="Niños">Niños</option>
+                            <option value="Mascotas">Mascotas</option>
+                            <option value="Bazar">Bazar</option>
+                            <option value="Electrónica">Electrónica</option>
                         </select>
                         <div id="e-categoria"></div>
                     </div>
@@ -63,6 +68,9 @@
                         <label for="imagen"><i class="bi bi-image"></i> Imagen del Producto</label>
                         <input type="file" id="imagen" name="imagen" class="form-control" accept="image/*">
                         <div id="e-imagen"></div>
+                    </div>
+                    <div>
+                        <input type="hidden" id="imagen_url" name="imagen_url">
                     </div>
                 </div>
                 <div class="card-footer text-center">

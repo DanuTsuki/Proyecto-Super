@@ -1,12 +1,17 @@
-import { getData, getDocumento, remove, save, update, getStorageRef } from './firebase.js';
+import { getData, getDocumento, remove, save, update, getStorageRef, verificarCodigoUnico } from './firebase.js';
 
 let id = 0;
+
 
 document.getElementById('btnSave').addEventListener('click', async (event) => {
     event.preventDefault();
     document.querySelectorAll('.form-control').forEach(item => {
         verificar(item.id);
     });
+
+    const categoria = document.getElementById('categoria');
+    verificar(categoria.id);
+    
     if (document.querySelectorAll('.is-invalid').length == 0) {
         const producto = {
             codigo: document.getElementById('codigo').value,
@@ -16,9 +21,21 @@ document.getElementById('btnSave').addEventListener('click', async (event) => {
             precio: document.getElementById('precio').value,
             stock: document.getElementById('stock').value,
             fecha_vencimiento: document.getElementById('fecha_vencimiento').value,
-            imagen: document.getElementById('imagen').files[0] || ''
+            imagenUrl: document.getElementById('imagenUrl').value || '' 
         };
+        if (!producto.imagen && !producto.imagenUrl) {
+            document.getElementById('imagen').classList.add('is-invalid');
+            document.getElementById('e-imagen').innerHTML = '<span class="badge bg-danger">El campo es obligatorio</span>';
+            return;
+        }
         if (id == 0) {
+            const codigoDuplicado = await verificarCodigoUnico(producto.codigo);
+            if (codigoDuplicado) {
+                Swal.fire('Error', 'El código ya está en uso', 'error');
+                document.getElementById('codigo').classList.add('is-invalid');
+                document.getElementById('e-codigo').innerHTML = '<span class="badge bg-danger">El código ya está en uso</span>';
+                return;
+            }
             await save(producto);
             Swal.fire('Guardado', '', 'success');
         } else {
@@ -87,7 +104,7 @@ window.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', async () => {
                 const doc = await getDocumento(btn.id);
                 const producto = doc.data();
-
+        
                 document.getElementById('codigo').value = producto.codigo;
                 document.getElementById('nombre').value = producto.nombre;
                 document.getElementById('descripcion').value = producto.descripcion;
@@ -95,12 +112,17 @@ window.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('precio').value = producto.precio;
                 document.getElementById('stock').value = producto.stock;
                 document.getElementById('fecha_vencimiento').value = producto.fecha_vencimiento;
-
+        
+                if (producto.imagenUrl) {
+                    document.getElementById('imagen').setAttribute('data-url', producto.imagenUrl);
+                }
+        
                 id = doc.id;
                 document.getElementById('codigo').readOnly = true;
                 document.getElementById('btnSave').value = 'Editar';
             });
         });
+        
     });
 });
 
@@ -121,5 +143,24 @@ const limpiar = () => {
     const btnSave = document.getElementById('btnSave');
     if (btnSave) {
         btnSave.value = 'Guardar';
+    }
+}
+
+window.verificarCodigoRepetido = async (input) => {
+    const codigo = input.value.trim();
+    if (codigo === "") {
+        input.classList.add('is-invalid');
+        document.getElementById('e-codigo').innerHTML = '<span class="badge bg-danger">El campo es obligatorio</span>';
+        return;
+    }
+    
+    const codigoDuplicado = await verificarCodigoUnico(codigo);
+    if (codigoDuplicado) {
+        input.classList.add('is-invalid');
+        document.getElementById('e-codigo').innerHTML = '<span class="badge bg-danger">El código ya está en uso</span>';
+    } else {
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        document.getElementById('e-codigo').innerHTML = '';
     }
 }
