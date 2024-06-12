@@ -21,14 +21,11 @@ document.getElementById('btnSave').addEventListener('click', async (event) => {
             precio: document.getElementById('precio').value,
             stock: document.getElementById('stock').value,
             fecha_vencimiento: document.getElementById('fecha_vencimiento').value,
-            imagenUrl: document.getElementById('imagenUrl').value || '' 
+            imagen: document.getElementById('imagen').files[0] || ''
         };
-        if (!producto.imagen && !producto.imagenUrl) {
-            document.getElementById('imagen').classList.add('is-invalid');
-            document.getElementById('e-imagen').innerHTML = '<span class="badge bg-danger">El campo es obligatorio</span>';
-            return;
-        }
+
         if (id == 0) {
+            // Verificar si el código ya existe antes de guardar
             const codigoDuplicado = await verificarCodigoUnico(producto.codigo);
             if (codigoDuplicado) {
                 Swal.fire('Error', 'El código ya está en uso', 'error');
@@ -104,7 +101,7 @@ window.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', async () => {
                 const doc = await getDocumento(btn.id);
                 const producto = doc.data();
-        
+
                 document.getElementById('codigo').value = producto.codigo;
                 document.getElementById('nombre').value = producto.nombre;
                 document.getElementById('descripcion').value = producto.descripcion;
@@ -112,17 +109,13 @@ window.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('precio').value = producto.precio;
                 document.getElementById('stock').value = producto.stock;
                 document.getElementById('fecha_vencimiento').value = producto.fecha_vencimiento;
-        
-                if (producto.imagenUrl) {
-                    document.getElementById('imagen').setAttribute('data-url', producto.imagenUrl);
-                }
-        
+                document.getElementById('imagen').value = producto.imagen;
+
                 id = doc.id;
                 document.getElementById('codigo').readOnly = true;
                 document.getElementById('btnSave').value = 'Editar';
             });
         });
-        
     });
 });
 
